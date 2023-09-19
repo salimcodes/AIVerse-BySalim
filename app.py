@@ -17,7 +17,7 @@ def index():
     
 # Option 1 
 
-@app.route('/option/<int:option_number>', methods = ['GET'])
+@app.route('/option/1', methods = ['GET'])
 def index_one(option_number):
     # Generate the filename based on the option_number (e.g., 'index-1.html')
     filename = f'index-{option_number}.html'
