@@ -15,15 +15,11 @@ def index():
 def option(option_number):
     # Generate the filename based on the option_number (e.g., 'index-1.html')
     filename = f'index-{option_number}.html'
-    try:
-        # Attempt to render the specified HTML file
-        return render_template(filename)
-    except:
-        # Handle the case when the specified HTML file does not exist
-        return 'Option not found', 404
+    return render_template(filename)
+ 
     
 
-@app.route('/option/<int:option_number>/result', methods=['POST'])
+@app.route('/option/1/result', methods=['POST'])
 def index_post():
     # Read the values from the form
     original_text = request.form['text']
