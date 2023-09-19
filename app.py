@@ -120,5 +120,45 @@ def index_post_two():
 
 
 
+
+# Option 3
+
+
+
+@app.route('/option/2', methods=['GET'])
+def index_three():
+    return render_template('index-3.html')
+
+@app.route('/option/2', methods=['POST'])
+# Example method for summarizing text
+def index_post_three():
+    from azure.core.credentials import AzureKeyCredential
+    from azure.ai.textanalytics import (
+        TextAnalyticsClient,
+        ExtractSummaryAction
+    ) 
+    original_text = request.form['text']
+    document = [original_text]
+
+    
+    poller = client.begin_analyze_actions(
+        document,
+        actions=[
+            ExtractSummaryAction(max_sentence_count=4)
+        ],
+    )
+
+    document_results = poller.result()
+    for result in document_results:
+        extract_summary_result = result[0]  # first document, first result
+        summary = ([sentence.text for sentence in extract_summary_result.sentences])
+
+    return render_template(
+        'results-3.html', 
+        document = document,
+        summary = summary
+        )
+
+
 if __name__ == '__main__':
     app.run(debug=True)
