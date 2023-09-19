@@ -19,7 +19,7 @@ def option(option_number):
  
     
 
-@app.route('/option/1/result', methods=['POST'])
+@app.route('/option/1/', methods=['POST'])
 def index_post():
     # Read the values from the form
     original_text = request.form['text']
