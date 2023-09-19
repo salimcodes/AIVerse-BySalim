@@ -18,10 +18,8 @@ def index():
 # Option 1 
 
 @app.route('/option/1', methods = ['GET'])
-def index_one(option_number):
-    # Generate the filename based on the option_number (e.g., 'index-1.html')
-    filename = f'index-{option_number}.html'
-    return render_template(filename)
+def index_one():
+    return render_template("index-1.html")
 
 @app.route('/option/1', methods=['POST'])
 def index_post_one():
@@ -125,11 +123,11 @@ def index_post_two():
 
 
 
-@app.route('/option/2', methods=['GET'])
+@app.route('/option/3', methods=['GET'])
 def index_three():
     return render_template('index-3.html')
 
-@app.route('/option/2', methods=['POST'])
+@app.route('/option/3', methods=['POST'])
 # Example method for summarizing text
 def index_post_three():
     from azure.core.credentials import AzureKeyCredential
