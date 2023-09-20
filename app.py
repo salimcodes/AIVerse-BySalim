@@ -69,8 +69,6 @@ def index_post_one():
 
 
 # Option 2
-
-
 language_key = os.getenv("LANGUAGE_KEY")
 language_endpoint = os.getenv("LANGUAGE_ENDPOINT")
 def authenticate_client():
@@ -120,13 +118,11 @@ def index_post_two():
 
 
 # Option 3
-
 @app.route('/option/3', methods=['GET'])
 def index_three():
     return render_template('index-3.html')
 
 @app.route('/option/3', methods=['POST'])
-# Example method for summarizing text
 def index_post_three():
     from azure.core.credentials import AzureKeyCredential
     from azure.ai.textanalytics import (
@@ -157,6 +153,119 @@ def index_post_three():
 
 
 #Option 4
+
+import os
+import time
+from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
+from msrest.authentication import CognitiveServicesCredentials
+from azure.cognitiveservices.vision.computervision import ComputerVisionClient
+cog_key = os.environ['COG_SERVICE_KEY']
+cog_endpoint = os.environ['COG_SERVICE_ENDPOINT']
+
+@app.route('/option/4', methods=['GET'])
+def index_four():
+    return render_template('index-4.html')
+
+def GetTextRead(image_data):
+    global cv_client
+    credential = CognitiveServicesCredentials(cog_key)
+    cv_client = ComputerVisionClient(cog_endpoint, credential)
+
+
+    read_op = cv_client.read_in_stream(image_data, raw=True)
+    operation_location = read_op.headers["Operation-Location"]
+    operation_id = operation_location.split("/")[-1]
+
+    while True:
+        read_results = cv_client.get_read_result(operation_id)
+        if read_results.status not in [OperationStatusCodes.running, OperationStatusCodes.not_started]:
+            break
+        time.sleep(1)
+
+    extracted_text = ""
+
+    if read_results.status == OperationStatusCodes.succeeded:
+        for page in read_results.analyze_result.read_results:
+            for line in page.lines:
+                extracted_text += line.text + ".  \n"
+
+    return extracted_text
+
+from werkzeug.utils import secure_filename
+# Define the directory where uploaded files will be stored
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'gif', 'tiff', 'bmp'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Function to check if a file has an allowed extension
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# Route to handle file uploads and perform OCR
+@app.route('/option/4', methods=['POST'])
+def index_post_four():
+    if 'file' not in request.files:
+        return redirect(request.url)
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return redirect(request.url)
+
+    if file and allowed_file(file.filename):
+        # Save the uploaded file to the UPLOAD_FOLDER
+        filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(filename)
+        
+        # Add your OCR logic here to extract text from the uploaded file
+        # Example:
+        extracted_text = GetTextRead(filename)  # Replace with your OCR function
+        return render_template('results-4.html', extracted_text=extracted_text)
+    else:
+        return 'Invalid file format! Allowed formats are: pdf, png, jpg, jpeg, gif, tiff, bmp'
+
+'''
+import os
+from flask import Flask, request, render_template, redirect, url_for
+from werkzeug.utils import secure_filename
+
+app = Flask(__name__)
+
+# Define the directory where uploaded files will be stored
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Function to check if a file has an allowed extension
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# Route to display the file upload form
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+# Route to handle file uploads
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return redirect(request.url)
+    file = request.files['file']
+    if file.filename == '':
+        return redirect(request.url)
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return 'File uploaded successfully!'
+    else:
+        return 'Invalid file format! Allowed formats are: txt, pdf, png, jpg, jpeg, gif'
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+'''
 
 
 
