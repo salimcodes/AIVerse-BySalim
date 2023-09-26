@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/c206c6ae-ae49-4043-9972-887e6b6f02fe/resourceGroups/appsvc_linux_centralus_basic/providers/Microsoft.Web/sites/AIVerse",
+    "appService.deploySubpath": "."
+}
